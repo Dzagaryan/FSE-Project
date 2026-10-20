@@ -8,7 +8,7 @@ README described arbitrary shapes. Commit `bac5055` removed the dimension
 check; commit `34ced98` removed the remaining `size(1)` check. The current
 tests include one-dimensional input.
 
-Another recorded fix is commit `060003b`: the adversarial test replaced a
+Another recorded fix is commit `5ed79fa`: the adversarial test replaced a
 hardcoded float32 expected value with the pure-PyTorch specification, so exact
 comparison follows the specified operation.
 
