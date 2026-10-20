@@ -56,6 +56,7 @@ The function validates both inputs inside the C++ extension using
 - Any value of `r` lies outside `[0, 4]` or is non-finite.
 - Either tensor has an unsupported dtype, device, or layout.
 - The input shapes differ.
+- Any of `x`, `r` requires gradient calculation.
 
 If any element is invalid, the entire call is rejected. The same input
 checks apply on every call; output values follow the formula directly.
