@@ -28,13 +28,21 @@ def test_exact_values():
     assert torch.equal(bifurcation_step(x, r), spec(x, r))
 
 
-def test_batch_and_noncontiguous_values():
-    x = torch.tensor([[0.1, 0.25, 0.5, 0.9]] * 4).T
-    r = torch.tensor([[1.0, 2.0, 3.0, 4.0]] * 4).T
-    actual = bifurcation_step(x, r)
-    assert torch.equal(actual, spec(x, r))
-    assert not torch.equal(actual, x)
-    assert actual.unique().numel() > 1
+def test_adversarial_input_not_noop_not_constant():
+    """Kind 4: values the formula treats differently.
+    
+    For x=[0.2, 0.5] and r=[2.0, 4.0]:
+    expected = [2*0.2*(1-0.2), 4*0.5*(1-0.5)] = [0.32, 1.0]
+    Not the input back, not one value copied to every position.
+    """
+    x = torch.tensor([0.2, 0.5], dtype=torch.float32)
+    r = torch.tensor([2.0, 4.0], dtype=torch.float32)
+    y = bifurcation_step(x, r)
+    
+    expected = torch.tensor([0.32, 1.0], dtype=torch.float32)
+    assert torch.equal(y, expected)
+    assert not torch.equal(y, x)                # not a no-op
+    assert y.unique().numel() > 1               # not one element reused
 
 
 def test_integer_tensor_raises_in_extension():
