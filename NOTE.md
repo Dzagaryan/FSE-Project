@@ -1,14 +1,30 @@
-# Project Note
+# Project note
 
-## 1. Real bugs we hit
-We encountered two real issues during our CI pipeline setup:
-1. **Contract mismatch (C++ vs README):** The C++ code strictly enforced a 2D shape (`TORCH_CHECK(x.dim() == 2)`), which crashed on 1D and batched tensors with `RuntimeError: Expected x to be 2D, got 1D`. However, the README stated the op should support "any common shape". This was fixed in commit [34ced98] by replacing the strict dimension check with `TORCH_CHECK(x.sizes() == r.sizes(), ...)`.
-2. **Floating-point precision in tests:** Our adversarial test failed because hardcoded expected values (like `0.32` and `1.0`) didn't exactly match the C++ float32 arithmetic (e.g., `4.0 * 0.5 * (1 - 0.5)` yielded `0.9999999`). This was fixed in commit [060003b] by calculating the expected value using the pure-PyTorch spec line `SPEC(x, r)` directly, avoiding hardcoded floats.
+## Bug found during development
 
-## 2. Unhandled case
-Our op does not support gradient flow (we explicitly reject tensors with `requires_grad=True` via `TORCH_CHECK`). Instead of silently breaking the autograd graph, it raises a clear `RuntimeError`.
+The original C++ checks assumed two-dimensional inputs. A one-dimensional
+tensor raised `RuntimeError` instead of producing a result, even though the
+README described arbitrary shapes. Commit `bac5055` removed the dimension
+check; commit `34ced98` removed the remaining `size(1)` check. The current
+tests include one-dimensional input.
 
-## 3. cProfile measurement
-We measured the performance on a large input (e.g., 10,000x10,000 tensor).
-Command: `python3 -m cProfile -s time bench.py`
-Output: [TODO: later, when we run it, paste the number of seconds here]
+Another recorded fix is commit `060003b`: the adversarial test replaced a
+hardcoded float32 expected value with the pure-PyTorch specification, so exact
+comparison follows the specified operation.
+
+## Unsupported case
+
+Inputs with `requires_grad=True` are rejected by `TORCH_CHECK` in C++ and
+raise `RuntimeError`; this extension does not implement autograd.
+
+## Large-input profile
+
+After `./tools/smoke.sh`, run this from the repository root:
+
+```bash
+/tmp/fse-smoke-try/bin/python -m cProfile -s cumulative tools/profile.py
+```
+
+The workload calls the installed extension ten times on 1,000,000-element
+float32 tensors. The measured cumulative time still needs to be recorded here
+from a successful run in the course container.

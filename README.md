@@ -73,5 +73,5 @@ r = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32)
 print(bifurcation_step(x, r))  # tensor([0.0000, 0.3750, 0.7500, 0.0000])
 ```
 
-See `NOTE.md` for a bug found during development, a rejected input, and a
-profiling observation.
+See `NOTE.md` for a bug found during development, a rejected input, and the
+large-input profiling command.

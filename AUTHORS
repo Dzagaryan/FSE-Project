@@ -1,5 +1,3 @@
-# One "Name <email>" per team member.
-# Emails must match each member's git author email (git config user.email).
-Anton Shangin <Anton.Shangin@skoltech.ru>
-Artem Dzhagarian <Artem.Dzhagarian@skoltecch.ru>
+Anton Shangin <anton.shangin@skoltech.ru>
+Artem Dzhagarian <Artem.Dzhagarian@skoltech.ru>
 Stanislav Krikunov <Stanislav.Krikunov@skoltech.ru>
