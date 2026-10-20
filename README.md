@@ -43,7 +43,7 @@ bifurcation_step(x: torch.Tensor, r: torch.Tensor) -> torch.Tensor
 |---|---|
 | Inputs | Dense CPU `torch.float32` tensors with layout `torch.strided` and the same arbitrary shape |
 | Input population | Every value of `x` is finite and must belong to `[0, 1]`, including both endpoints; this input is the initial state for the current step |
-| Growth parameter | Every value of `r` is finite and strictly greater than zero |
+| Growth parameter | Every value of `r` is finite and must belong to `[0, 4]` |
 | Output | A new CPU `torch.float32` tensor with the same shape as the inputs |
 | Input modification | Input tensors remain unaffected |
 
@@ -53,7 +53,7 @@ The function validates both inputs inside the C++ extension using
 `TORCH_CHECK`. It raises `RuntimeError` if:
 
 - Any value of `x` lies outside `[0, 1]` or is non-finite.
-- Any value of `r` is less than or equal to zero or is non-finite.
+- Any value of `r` lies outside `[0, 4]` or is non-finite.
 - Either tensor has an unsupported dtype, device, or layout.
 - The input shapes differ.
 
