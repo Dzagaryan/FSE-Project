@@ -17,6 +17,9 @@ torch::Tensor bifurcation_step(torch::Tensor x, torch::Tensor r)
     // inf, nan check
     TORCH_CHECK(torch::isfinite(x).all().item<bool>(), "x must contain only finite values");
     TORCH_CHECK(torch::isfinite(r).all().item<bool>(), "r must contain only finite values");
+    // value limits check
+    TORCH_CHECK(((x >= 0) & (x <= 1)).all().item<bool>(), "Expected all elements of x to be in [0, 1]");
+    TORCH_CHECK(((r >= 0) & (r <= 4)).all().item<bool>(), "Expected all elements of r to be in [0, 4]");
 
     // ATen-based formula implementation
     return r * x * (1 - x);
