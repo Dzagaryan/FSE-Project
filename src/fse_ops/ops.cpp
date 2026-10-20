@@ -32,5 +32,5 @@ torch::Tensor bifurcation_step(torch::Tensor x, torch::Tensor r)
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, module) {
-    module.def("bifurcation_step", &bifurcation_step, "Clamp a CPU tensor to [0, 1]");
+    module.def("bifurcation_step", &bifurcation_step, "Single bifurcation step.");
 }
