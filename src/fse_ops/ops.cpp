@@ -14,6 +14,9 @@ torch::Tensor bifurcation_step(torch::Tensor x, torch::Tensor r)
     // sizes check
     TORCH_CHECK(x.size(0) == r.size(0), "Sizes of x and r are expected to be equal in dimension 0");
     TORCH_CHECK(x.size(1) == r.size(1), "Sizes of x and r are expected to be equal in dimension 1");
+    // inf, nan check
+    TORCH_CHECK(torch::isfinite(x).all().item<bool>(), "x must contain only finite values");
+    TORCH_CHECK(torch::isfinite(r).all().item<bool>(), "r must contain only finite values");
 
     // ATen-based formula implementation
     return r * x * (1 - x);
