@@ -15,9 +15,8 @@ import torch
 
 from fse_ops import bifurcation_step
 
-
 # Spec line from README.md — the single source of truth.
-SPEC = lambda x, r: r * x * (1.0 - x)  # noqa: E731
+SPEC = lambda x, r: r * x * (1.0 - x)
 
 
 def test_shape_preserved():
