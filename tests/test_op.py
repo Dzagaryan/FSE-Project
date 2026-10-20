@@ -55,7 +55,9 @@ def test_adversarial_input_not_noop_not_constant():
     r = torch.tensor([2.0, 4.0], dtype=torch.float32)
     y = bifurcation_step(x, r)
     
-    expected = torch.tensor([0.32, 1.0], dtype=torch.float32)
+    # Fixed Bag
+    # expected = torch.tensor([0.32, 1.0], dtype=torch.float32)
+    expected = SPEC(x, r)
     assert torch.equal(y, expected)
     assert not torch.equal(y, x)                # not a no-op
     assert y.unique().numel() > 1               # not one element reused
