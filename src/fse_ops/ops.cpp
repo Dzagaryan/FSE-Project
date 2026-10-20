@@ -8,6 +8,9 @@ torch::Tensor bifurcation_step(torch::Tensor x, torch::Tensor r)
     // dtype check
     TORCH_CHECK(x.scalar_type() == torch::kFloat32, "Expected dtype of x is float32, got ", x.scalar_type());
     TORCH_CHECK(r.scalar_type() == torch::kFloat32, "Expected dtype of r is float32, got ", r.scalar_type());
+    // dimensions check
+    TORCH_CHECK(x.dim() == 2, "Expected x to be 2D, got ", x.dim(), "D");
+    TORCH_CHECK(r.dim() == 2, "Expected r to be 2D, got ", r.dim(), "D");
 
     // ATen-based formula implementation
     return r * x * (1 - x);
