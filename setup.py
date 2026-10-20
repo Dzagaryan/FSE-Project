@@ -6,7 +6,13 @@ setup(
     version="0.1.0",
     package_dir={"": "src"},
     packages=["fse_ops"],
-    ext_modules=[CppExtension("fse_ops._C", ["src/fse_ops/ops.cpp"])],
+    ext_modules=[
+        CppExtension(
+            "fse_ops._C",
+            ["src/fse_ops/ops.cpp"],
+            extra_compile_args={"cxx": ["-ffp-contract=off"]},
+        )
+    ],
     cmdclass={"build_ext": BuildExtension},
     install_requires=["torch"],
 )

@@ -1,68 +1,77 @@
-# fse_ops: Single iteration of the logistic map
+# fse_ops: one logistic-map step
 
-A PyTorch C++ extension for one elementwise update over an arbitrary grid
-of normalized population states and growth parameters. Each grid point has
-its own state and strictly positive parameter.
-
-**Version:** `0.1.0`.
-
-## Operation and interpretation
-
-For a two-dimensional grid,
-
-$$
-X^{(n+1)}_{ij}=R_{ij}\,X^{(n)}_{ij}\left(1-X^{(n)}_{ij}\right),
-\qquad 0\leq X^{(0)}_{ij}\leq 1,
-\qquad R_{ij}>0.
-$$
-
-The same elementwise rule applies to tensors of any common shape. The
-indices identify independent grid points; both initial populations and
-parameters may be chosen independently at every point.
-
-$X^{(n)}_{ij}$ is the population divided by a fixed reference population scale (normalized population).
-
-$R_{ij}$ is the reproduction parameter.
-
-The factor $1-X^{(n)}_{ij}$
-models density feedback from limited resources and competition.
-
-In words, multiply each current state by its corresponding growth parameter
-and by one minus that state. One call computes one update for the
-entire grid.
-
-## Python API and contract
-
-**Function:** `fse_ops.bifurcation_step`.
-
-```text
-bifurcation_step(x: torch.Tensor, r: torch.Tensor) -> torch.Tensor
-```
-
-| Property | Contract |
-|---|---|
-| Inputs | Dense CPU `torch.float32` tensors with layout `torch.strided` and the same arbitrary shape |
-| Input population | Every value of `x` is finite and must belong to `[0, 1]`, including both endpoints; this input is the initial state for the current step |
-| Growth parameter | Every value of `r` is finite and must belong to `[0, 4]` |
-| Output | A new CPU `torch.float32` tensor with the same shape as the inputs |
-| Input modification | Input tensors remain unaffected |
-
-### Input validation
-
-The function validates both inputs inside the C++ extension using
-`TORCH_CHECK`. It raises `RuntimeError` if:
-
-- Any value of `x` lies outside `[0, 1]` or is non-finite.
-- Any value of `r` lies outside `[0, 4]` or is non-finite.
-- Either tensor has an unsupported dtype, device, or layout.
-- The input shapes differ.
-- Any of `x`, `r` requires gradient calculation.
-
-If any element is invalid, the entire call is rejected. The same input
-checks apply on every call; output values follow the formula directly.
-
-The one-line pure-PyTorch specification is
+`fse_ops.bifurcation_step(x, r)` applies one elementwise logistic-map update to
+CPU tensors. At each position it multiplies the growth parameter `r` by the
+state `x` and by one minus that state. The exact one-line PyTorch specification is:
 
 ```python
 expected = r * x * (1.0 - x)
 ```
+
+The function accepts two dense, strided, CPU `torch.float32` tensors with the
+same shape. Every `x` value must be finite and in `[0, 1]`; every `r` value
+must be finite and in `[0, 4]`. Neither tensor may require gradients. It
+returns a new tensor with the same shape and dtype. The C++ extension checks
+the contract with `TORCH_CHECK` and raises `RuntimeError` for invalid inputs,
+including integer tensors. Empty and noncontiguous tensors are supported.
+
+## Build and test in the course container
+
+Start the course lab from its directory containing `compose.yaml`:
+
+```bash
+docker compose up -d
+docker compose exec lab bash
+cd /course/team-repo  # use the actual mounted checkout path
+```
+
+Build the wheel and run the full installed-wheel proof:
+
+```bash
+make wheel
+make test
+```
+
+Or run the one-command smoke proof:
+
+```bash
+./tools/smoke.sh
+```
+
+The script builds a Linux wheel, installs CPU PyTorch and the wheel into a
+separate fresh virtual environment, imports from `/tmp`, checks one exact
+result, and runs pytest on a copy of the tests from `/tmp`. It prints `OK`
+only after all checks pass. The first run downloads PyTorch and can take
+several minutes.
+
+For a manual wheel install, use `make wheel`, create a new venv, install
+PyTorch from `https://download.pytorch.org/whl/cpu`, and then install
+`dist/*.whl` with `pip`.
+`make install` performs those steps in `/tmp/fse-install`.
+
+## Docker image
+
+The Dockerfile uses the `fse-09-packaging` course image used by the lab.
+Build that base once via the course `docker compose build lab`, then from this
+repository run:
+
+```bash
+docker build -t fse-ops:0.1 .
+docker run --rm fse-ops:0.1
+```
+
+The image builds its own wheel and runs pytest against its installed copy.
+
+## Example
+
+```python
+import torch
+from fse_ops import bifurcation_step
+
+x = torch.tensor([0.0, 0.25, 0.5, 1.0], dtype=torch.float32)
+r = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32)
+print(bifurcation_step(x, r))  # tensor([0.0000, 0.3750, 0.7500, 0.0000])
+```
+
+See `NOTE.md` for a bug found during development, a rejected input, and a
+profiling observation.
