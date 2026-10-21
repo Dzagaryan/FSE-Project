@@ -53,3 +53,16 @@ def test_integer_tensor_raises_in_extension():
 def test_out_of_range_raises():
     with pytest.raises(RuntimeError, match=r"x must be in \[0, 1\]"):
         bifurcation_step(torch.tensor([-0.1, 0.5]), torch.ones(2))
+
+def test_values_with_leading_batch_dimension():
+    batch_dim = 4
+    x = torch.tensor([0.0, 0.5, 1.0], dtype=torch.float32)
+    r = torch.tensor([0.0, 2.0, 4.0], dtype=torch.float32)
+
+    batched_x = torch.tile(x.unsqueeze(0), (batch_dim, 1))
+    batched_r = torch.tile(r.unsqueeze(0), (batch_dim, 1))
+
+    actual = bifurcation_step(batched_x, batched_r)
+    expected = spec(batched_x, batched_r)
+
+    assert torch.equal(actual, expected)
