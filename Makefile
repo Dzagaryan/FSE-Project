@@ -16,3 +16,4 @@ test:
 
 clean:
 	rm -rf build dist src/fse_ops.egg-info
+	find . -type d -name '__pycache__' -prune -exec rm -rf {} +
