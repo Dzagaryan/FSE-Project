@@ -1,17 +1,15 @@
-.PHONY: wheel install test clean
+.PHONY: wheel install test clean smoke
 
 wheel:
-	python3 -m venv /tmp/fse-build
-	/tmp/fse-build/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu
-	/tmp/fse-build/bin/pip install setuptools wheel
-	/tmp/fse-build/bin/pip wheel . --no-deps --no-build-isolation -w dist
+	python3 -m pip wheel . --no-deps -w dist
 
-install: wheel
-	python3 -m venv /tmp/fse-install
-	/tmp/fse-install/bin/pip install torch --index-url https://download.pytorch.org/whl/cpu
-	/tmp/fse-install/bin/pip install --no-deps dist/*.whl
+install:
+	python3 -m pip install dist/*.whl
 
 test:
+	python3 -m pytest -q tests
+
+smoke:
 	./tools/smoke.sh
 
 clean:

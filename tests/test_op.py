@@ -18,8 +18,8 @@ def test_output_shape():
     """
     Kind 1: verify that the output preserves the input shape.
     """
-    x = torch.tensor([[0.1, 0.2], [0.5, 1.0]])
-    r = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+    x = torch.tensor([[0.1, 0.2], [0.5, 1.0]], dtype=torch.float32)
+    r = torch.tensor([[1.0, 2.0], [3.0, 4.0]], dtype=torch.float32)
     assert bifurcation_step(x, r).shape == x.shape
 
 
@@ -36,23 +36,21 @@ def test_exact_values():
     """
     Kind 3: compare fixed inputs exactly with the PyTorch reference.
     """
-    x = torch.tensor([0.0, 0.25, 0.5, 0.75, 1.0])
-    r = torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0])
+    x = torch.tensor([0.0, 0.25, 0.5, 0.75, 1.0], dtype=torch.float32)
+    r = torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0], dtype=torch.float32)
     assert torch.equal(bifurcation_step(x, r), spec(x, r))
 
 
 def test_adversarial_input_not_noop_not_constant():
     """
     Kind 4: values the formula treats differently.
-    
-    For x=[0.2, 0.5] and r=[2.0, 4.0]:
-    expected = [2*0.2*(1-0.2), 4*0.5*(1-0.5)] = [0.32, 1.0]
-    Not the input back, not one value copied to every position.
+    For x=[0.2, 0.5] and r=[2.0, 4.0] the spec line gives distinct values,
+    so a fake op (no-op or constant) is caught by the two asserts below.
     """
     x = torch.tensor([0.2, 0.5], dtype=torch.float32)
     r = torch.tensor([2.0, 4.0], dtype=torch.float32)
     y = bifurcation_step(x, r)
-    
+
     expected = spec(x, r)
     assert torch.equal(y, expected)
     assert not torch.equal(y, x)                # not a no-op
