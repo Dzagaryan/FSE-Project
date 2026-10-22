@@ -19,10 +19,12 @@ raise `RuntimeError`; this extension does not implement autograd.
 
 ## Large-input profile
 
-After `./tools/smoke.sh`, run this from the repository root:
+Run this from the repository root in any environment where the wheel is installed (for example the /tmp/fse-smoke-try venv that ./tools/smoke.sh creates):
+
+
 
 ```bash
-/tmp/fse-smoke-try/bin/python -m cProfile -s cumulative tools/profile.py
+python3 -m cProfile -s cumulative tools/profile.py
 ```
 
 The workload calls the installed extension ten times on 1,000,000-element

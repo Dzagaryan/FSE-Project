@@ -47,7 +47,8 @@ several minutes.
 For a manual wheel install, use `make wheel`, create a new venv, install
 PyTorch from `https://download.pytorch.org/whl/cpu`, and then install
 `dist/*.whl` with `pip`.
-`make install` performs those steps in `/tmp/fse-install`.
+`make install` installs `dist/*.whl` into the current Python environment;
+create and activate a fresh venv first if you want isolation.
 
 ## Docker image
 
