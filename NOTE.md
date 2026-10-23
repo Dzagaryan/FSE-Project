@@ -4,9 +4,12 @@
 
 The original C++ checks assumed two-dimensional inputs. A one-dimensional
 tensor raised `RuntimeError` instead of producing a result, even though the
-README described arbitrary shapes. Commit `bac5055` removed the dimension
-check; commit `34ced98` removed the remaining `size(1)` check. The current
-tests include one-dimensional input.
+README described arbitrary shapes. It surfaced as a red `pytest` test: a
+1-D input failed with `RuntimeError: x must have 2 dimensions` in the
+traceback, and the test for arbitrary shapes went from failing to passing
+after the fix. Commit `bac5055` removed the dimension check; commit
+`34ced98` removed the remaining `size(1)` check. The current tests include
+one-dimensional input.
 
 Another recorded fix is commit `5ed79fa`: the adversarial test replaced a
 hardcoded float32 expected value with the pure-PyTorch specification, so exact
@@ -19,10 +22,12 @@ raise `RuntimeError`; this extension does not implement autograd.
 
 ## Large-input profile
 
-After `./tools/smoke.sh`, run this from the repository root:
+Run this from the repository root in any environment where the wheel is installed (for example the /tmp/fse-smoke-try venv that ./tools/smoke.sh creates):
+
+
 
 ```bash
-/tmp/fse-smoke-try/bin/python -m cProfile -s cumulative tools/profile.py
+python3 -m cProfile -s cumulative tools/profile.py
 ```
 
 The workload calls the installed extension ten times on 1,000,000-element

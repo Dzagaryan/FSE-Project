@@ -15,21 +15,25 @@ returns a new tensor with the same shape and dtype. The C++ extension checks
 the contract with `TORCH_CHECK` and raises `RuntimeError` for invalid inputs,
 including integer tensors. Empty and noncontiguous tensors are supported.
 
-## Build and test in the course container
+## Build and test
 
-Start the course lab from its directory containing `compose.yaml`:
+From the repository root (the unpacked project directory), build the wheel,
+install it into the current environment, and run the full installed-wheel proof:
+
+```bash
+make wheel
+make install
+make test
+```
+
+Inside the course container the same commands run after attaching a shell;
+the checkout is mounted at `/course/team-repo`:
 
 ```bash
 docker compose up -d
 docker compose exec lab bash
 cd /course/team-repo  # use the actual mounted checkout path
-```
-
-Build the wheel and run the full installed-wheel proof:
-
-```bash
-make wheel
-make test
+make wheel && make install && make test
 ```
 
 Or run the one-command smoke proof:
@@ -47,13 +51,14 @@ several minutes.
 For a manual wheel install, use `make wheel`, create a new venv, install
 PyTorch from `https://download.pytorch.org/whl/cpu`, and then install
 `dist/*.whl` with `pip`.
-`make install` performs those steps in `/tmp/fse-install`.
+`make install` installs `dist/*.whl` into the current Python environment;
+create and activate a fresh venv first if you want isolation.
 
 ## Docker image
 
-The Dockerfile uses the `fse-09-packaging` course image used by the lab.
-Build that base once via the course `docker compose build lab`, then from this
-repository run:
+The Dockerfile builds on the public `ubuntu:24.04` image. Its builder stage
+installs Python, pip, and a C++ compiler, builds the wheel, and the final
+stage installs CPU PyTorch and then the wheel. From this repository run:
 
 ```bash
 docker build -t fse-ops:0.1 .
