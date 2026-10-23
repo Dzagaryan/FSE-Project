@@ -52,9 +52,9 @@ create and activate a fresh venv first if you want isolation.
 
 ## Docker image
 
-The Dockerfile uses the `fse-09-packaging` course image used by the lab.
-Build that base once via the course `docker compose build lab`, then from this
-repository run:
+The Dockerfile builds on the public `ubuntu:24.04` image. Its builder stage
+installs Python, pip, and a C++ compiler, builds the wheel, and the final
+stage installs CPU PyTorch and then the wheel. From this repository run:
 
 ```bash
 docker build -t fse-ops:0.1 .
@@ -62,6 +62,8 @@ docker run --rm fse-ops:0.1
 ```
 
 The image builds its own wheel and runs pytest against its installed copy.
+
+
 
 ## Example
 
