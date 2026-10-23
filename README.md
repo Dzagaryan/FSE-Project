@@ -15,59 +15,88 @@ returns a new tensor with the same shape and dtype. The C++ extension checks
 the contract with `TORCH_CHECK` and raises `RuntimeError` for invalid inputs,
 including integer tensors. Empty and noncontiguous tensors are supported.
 
+> The bounds `x ∈ [0, 1]` and `r ∈ [0, 4]` are artificial requirements API restrictions. The PyTorch expression can be evaluated outside them, but the extension rejects out-of-range inputs with `RuntimeError`.
+
 ## Build and test
 
-From the repository root (the unpacked project directory), build the wheel,
-install it into the current environment, and run the full installed-wheel proof:
+Build and test the Linux wheel inside the course container. Keep the checkout
+in the course directory's `FSE-Project` subdirectory; the course directory
+contains `compose.yaml` and is mounted at `/course` inside the container.
+
+**On your laptop**, starting from the `FSE-Project` repository root, enter the
+parent course directory and open a shell in the lab container:
 
 ```bash
-make wheel
-make install
-make test
-```
-
-Inside the course container the same commands run after attaching a shell;
-the checkout is mounted at `/course/team-repo`:
-
-```bash
-docker compose up -d
+cd .. &&
+docker compose up -d &&
 docker compose exec lab bash
-cd /course/team-repo  # use the actual mounted checkout path
-make wheel && make install && make test
 ```
 
-Or run the one-command smoke proof:
+**Inside the lab container**, run the complete build/install/test proof:
 
 ```bash
+cd /course/FSE-Project
 ./tools/smoke.sh
 ```
 
-The script builds a Linux wheel, installs CPU PyTorch and the wheel into a
-separate fresh virtual environment, imports from `/tmp`, checks one exact
-result, and runs pytest on a copy of the tests from `/tmp`. It prints `OK`
-only after all checks pass. The first run downloads PyTorch and can take
-several minutes.
+The script creates fresh build and test environments, builds and installs a Linux wheel, and runs tests from `/tmp`. Success: `7 passed` and `OK`.
 
-For a manual wheel install, use `make wheel`, create a new venv, install
-PyTorch from `https://download.pytorch.org/whl/cpu`, and then install
-`dist/*.whl` with `pip`.
+### Manual alternative
+
+To run the Makefile targets manually instead of the smoke script, execute the
+following **inside the lab container**. This creates the virtual environment
+inside Linux and removes earlier build outputs, including any macOS wheels:
+
+```bash
+cd /course/FSE-Project &&
+python3 -m venv --clear /tmp/fse-check &&
+source /tmp/fse-check/bin/activate &&
+python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu &&
+python3 -m pip install pytest &&
+make clean
+```
+
+With the environment activated, build, install, and test the wheel:
+
+```bash
+make wheel && make install && make test
+```
+
 `make install` installs `dist/*.whl` into the current Python environment;
-create and activate a fresh venv first if you want isolation.
+`make test` runs the repository's tests in that environment. Use the smoke
+script above for the full proof with separate build and test environments
+and tests copied outside the source tree.
 
 ## Docker image
 
-The Dockerfile builds on the public `ubuntu:24.04` image. Its builder stage
-installs Python, pip, and a C++ compiler, builds the wheel, and the final
-stage installs CPU PyTorch and then the wheel. From this repository run:
+The two-stage `ubuntu:24.04` image builds the wheel and runs pytest against its installed copy.
+
+Build and run the image **on your laptop**, from the `FSE-Project` repository
+directory:
 
 ```bash
-docker build -t fse-ops:0.1 .
+docker build -t fse-ops:0.1 . &&
 docker run --rm fse-ops:0.1
 ```
 
-The image builds its own wheel and runs pytest against its installed copy.
+The container runs pytest against the installed wheel. The `&&` ensures that
+tests run only after a successful image build, so a failed build cannot lead
+to testing an older image with the same tag. The image builds its own wheel and
+runs pytest against its installed copy.
 
 ## Example
+
+After a successful smoke run, open Python in its test environment **from your
+laptop terminal**, in the `FSE-Project` directory:
+
+```bash
+docker compose exec lab /tmp/fse-smoke-try/bin/python
+```
+
+If you used the manual alternative instead, replace
+`/tmp/fse-smoke-try/bin/python` with `/tmp/fse-check/bin/python` in this
+command. Both variants open Python inside the lab container. Enter the
+following in that Python session:
 
 ```python
 import torch
@@ -78,5 +107,4 @@ r = torch.tensor([1.0, 2.0, 3.0, 4.0], dtype=torch.float32)
 print(bifurcation_step(x, r))  # tensor([0.0000, 0.3750, 0.7500, 0.0000])
 ```
 
-See `NOTE.md` for a bug found during development, a rejected input, and the
-large-input profiling command.
+See `NOTE.md` for the bug report, unsupported case, and profiling results.
