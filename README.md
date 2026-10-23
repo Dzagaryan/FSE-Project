@@ -15,21 +15,25 @@ returns a new tensor with the same shape and dtype. The C++ extension checks
 the contract with `TORCH_CHECK` and raises `RuntimeError` for invalid inputs,
 including integer tensors. Empty and noncontiguous tensors are supported.
 
-## Build and test in the course container
+## Build and test
 
-Start the course lab from its directory containing `compose.yaml`:
+From the repository root (the unpacked project directory), build the wheel,
+install it into the current environment, and run the full installed-wheel proof:
+
+```bash
+make wheel
+make install
+make test
+```
+
+Inside the course container the same commands run after attaching a shell;
+the checkout is mounted at `/course/team-repo`:
 
 ```bash
 docker compose up -d
 docker compose exec lab bash
 cd /course/team-repo  # use the actual mounted checkout path
-```
-
-Build the wheel and run the full installed-wheel proof:
-
-```bash
-make wheel
-make test
+make wheel && make install && make test
 ```
 
 Or run the one-command smoke proof:
@@ -62,8 +66,6 @@ docker run --rm fse-ops:0.1
 ```
 
 The image builds its own wheel and runs pytest against its installed copy.
-
-
 
 ## Example
 

@@ -4,9 +4,12 @@
 
 The original C++ checks assumed two-dimensional inputs. A one-dimensional
 tensor raised `RuntimeError` instead of producing a result, even though the
-README described arbitrary shapes. Commit `bac5055` removed the dimension
-check; commit `34ced98` removed the remaining `size(1)` check. The current
-tests include one-dimensional input.
+README described arbitrary shapes. It surfaced as a red `pytest` test: a
+1-D input failed with `RuntimeError: x must have 2 dimensions` in the
+traceback, and the test for arbitrary shapes went from failing to passing
+after the fix. Commit `bac5055` removed the dimension check; commit
+`34ced98` removed the remaining `size(1)` check. The current tests include
+one-dimensional input.
 
 Another recorded fix is commit `5ed79fa`: the adversarial test replaced a
 hardcoded float32 expected value with the pure-PyTorch specification, so exact
